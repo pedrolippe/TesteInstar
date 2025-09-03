@@ -1,5 +1,8 @@
 '''
-PARSE: método responsável por processar a resposta e retornar os dados coletados
+PARSE: metodo responsável por processar a resposta e retornar os dados coletados
+// - Acessa todos os nós
+./ - Acessa um nó específico
+.// - Acessa um nó específico dentro do caminho informado
 '''
 
 import scrapy
@@ -7,6 +10,7 @@ import scrapy
 class VilavalerioSpider(scrapy.Spider):
     name = "vilaValerio"
     allowed_domains = ["vilavalerio.es.gov.br"] #Domínios permitidos
+    #Cria uma 'lista' de links e acessa as urls com o valor de 1 a 22.
     start_urls = [f"https://vilavalerio.es.gov.br/Noticias?page={i}" for i in range(1, 23)]
 
     custom_settings = {
@@ -35,22 +39,27 @@ class VilavalerioSpider(scrapy.Spider):
         }
     }
 
+    #Função que analisa o conteúdo do site
     def parse(self, response):
-        #Pega a chave com o link
+        #cria um loop que pega todos os 'href' dentro do elemento 'a', que está na classe 'title-list'
+        #O 'getall()' retorna uma lista com os href
         for noticias in response.xpath('//h4[@class="title-list"]/a/@href').getall():
-            # Colhe a resposta do seguimento 'noticias'
+            #Cria uma requisição para o link em 'noticias' e roda o parse para coletar os dados
             yield response.follow(noticias, callback=self.parse_conteudo)
 
     def parse_conteudo(self, response):
         yield {
-            'url': response.url,
+            'url': response.url, #Uma condição que retorna a URL da página
             'titulo': response.xpath('//div[@class="col-lg-12"]/h4/text()').get(),
             'data': response.xpath('//div[@class="published"]/text()').get(),
             'dataAtualizacao': response.xpath('//*[@id="layout-content"]/div/div[2]/div/div/div/div/div/div/article/header/div[1]/div/div/div/text()[2]').get(),
-            'texto': " ".join(response.xpath('string(//div[@class="clearfix body-part"])').getall()),
+            #Pega o conteúdo da div e transforma em uma lista de strings. O join serve para juntar os elementos da lista, separando-os por ' '
+            'texto': ' '.join(response.xpath('string(//div[@class="clearfix body-part"])').getall()),
+            #Pega todas as imagens dentro de 'article'
             'imagens': response.xpath('//article[@class="col-lg-12 noticia content-item"]//img/@src').getall(),
+            #Cria uma lista de dicionários
             'arquivos': [{
-                'nome': (arquivo.xpath('string()').get()).replace(' ', ''),
-                'arquivo': ((arquivo.xpath('./@href').get()) or []).replace('https://vilavalerio.es.gov.br', '')
-            } for arquivo in response.xpath('//div[@class="clearfix body-part"]//a')]
+                'nome': (arquivo.xpath('string()').get()).replace(' ', ''), #Pega o texto do arquivo e transforma em uma string
+                'arquivo': ((arquivo.xpath('./@href').get()) or []).replace('https://vilavalerio.es.gov.br', '') #Se encontrar, pega o arquivo, senão retorna []
+            } for arquivo in response.xpath('//div[@class="clearfix body-part"]//a')] #Cria um loop que percorre cada arquivo dentro da div
         }
