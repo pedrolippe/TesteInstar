@@ -53,7 +53,7 @@ class VilavalerioSpider(scrapy.Spider):
             'titulo': response.xpath('//div[@class="col-lg-12"]/h4/text()').get(),
             'data': response.xpath('//div[@class="published"]/text()').get(),
             'dataAtualizacao': response.xpath('//*[@id="layout-content"]/div/div[2]/div/div/div/div/div/div/article/header/div[1]/div/div/div/text()[2]').get(),
-            #Pega o conteúdo da div e transforma em uma lista de strings. O join serve para juntar os elementos da lista, separando-os por ' '
+            #Pega o conteúdo da div e concatena em uma única string. O join serve para não deixar eem uma lista e facilitar o tratamento
             'texto': ' '.join(response.xpath('string(//div[@class="clearfix body-part"])').getall()),
             #Pega todas as imagens dentro de 'article'
             'imagens': response.xpath('//article[@class="col-lg-12 noticia content-item"]//img/@src').getall(),
