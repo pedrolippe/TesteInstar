@@ -1,8 +1,13 @@
 '''
-PARSE: metodo responsável por processar a resposta e retornar os dados coletados
-// - Acessa todos os nós
-./ - Acessa um nó específico
-.// - Acessa um nó específico dentro do caminho informado
+// - Procura o elemento em todas as chaves da estrutura, ou seja, qualquer lugar do documento
+./ - Acessa um elemento específico dentro do nó
+.// - Procura o elemento dentro do nó atual, ou seja, do ponto em que você está
+
+yield - é um retorno de chamada
+def - função
+parse - é chamado para manipular a resposta baixada por cada uma das requisições feitas
+response.follow - basicamente cria uma solicitação
+callback - busca a URL fornecida e a analisa
 '''
 
 import scrapy
@@ -39,21 +44,23 @@ class VilavalerioSpider(scrapy.Spider):
         }
     }
 
-    #Função que analisa o conteúdo do site
+    #Cria uma função que retorna as respostas baixadas do conteúdo do site
     def parse(self, response):
         #cria um loop que pega todos os 'href' dentro do elemento 'a', que está na classe 'title-list'
         #O 'getall()' retorna uma lista com os href
         for noticias in response.xpath('//h4[@class="title-list"]/a/@href').getall():
-            #Cria uma requisição para o link em 'noticias' e roda o parse para coletar os dados
+            #Retorna o que foi o que foi encontrado na solicitação feita para 'noticias'
             yield response.follow(noticias, callback=self.parse_conteudo)
 
+    #Cria uma função que retorna as respostas baixadas dentro do conteúdo da notícia
     def parse_conteudo(self, response):
+        #Retorna os elementos informados
         yield {
-            'url': response.url, #Uma condição que retorna a URL da página
+            'url': response.url, #Retorna a URL da página
             'titulo': response.xpath('//div[@class="col-lg-12"]/h4/text()').get(),
             'data': response.xpath('//div[@class="published"]/text()').get(),
             'dataAtualizacao': response.xpath('//*[@id="layout-content"]/div/div[2]/div/div/div/div/div/div/article/header/div[1]/div/div/div/text()[2]').get(),
-            #Pega o conteúdo da div e concatena em uma única string. O join serve para não deixar eem uma lista e facilitar o tratamento
+            #Pega o conteúdo da div e concatena em uma única string. O join serve para não deixar em uma lista e facilitar o tratamento
             'texto': ' '.join(response.xpath('string(//div[@class="clearfix body-part"])').getall()),
             #Pega todas as imagens dentro de 'article'
             'imagens': response.xpath('//article[@class="col-lg-12 noticia content-item"]//img/@src').getall(),
