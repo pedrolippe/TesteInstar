@@ -19,27 +19,27 @@ class VilavalerioSpider(scrapy.Spider):
     start_urls = [f"https://vilavalerio.es.gov.br/Noticias?page={i}" for i in range(1, 23)]
 
     custom_settings = {
-        'USER_AGENTS_LIST': [
+        'USER_AGENTS_LIST': [ #Cria agentes que simulam o acesso de outro computador/navegador, evitando bloqueio
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15',
             'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0',
             'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
             'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 Chrome/110.0.5481.65 Mobile Safari/537.36',
         ],
-        'DEFAULT_REQUEST_HEADERS': {
-            'Accept-Language': 'pt-BR,pt;q=0.9',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'DEFAULT_REQUEST_HEADERS': { #Cabeçalhos padrão
+            'Accept-Language': 'pt-BR,pt;q=0.9', #Linguagem aceita (Português)
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', #Conteúdo aceito. Aceita prioritariamente elementos html e xhtml
         },
-        'DOWNLOAD_DELAY': 1,
-        'RANDOMIZE_DOWNLOAD_DELAY': True,
-        'AUTOTHROTTLE_ENABLED': True,
-        'RETRY_ENABLED': True,
-        'RETRY_TIMES': 5,
-        'FEEDS': {
+        'DOWNLOAD_DELAY': 1, #Cria um delay de um segundo entre um requisição e outra
+        'RANDOMIZE_DOWNLOAD_DELAY': True, #Cria um atraso aleatório entre as requisições
+        'AUTOTHROTTLE_ENABLED': True, #Ajusta automaticamente a velocidade das requisições
+        'RETRY_ENABLED': True, #Caso ocorra algum erro, tenta novamente
+        'RETRY_TIMES': 5, #Máximo de 5 tentativas
+        'FEEDS': { #Cria parámetros para a criação do JSON
             'links_licitacoes.json': {
-                'format': 'json',
-                'encoding': 'utf8',
-                'overwrite': True,
+                'format': 'json', #Formato do arquivo
+                'encoding': 'utf8', #Codificação do JSON (UTF-8)
+                'overwrite': True, #Sobrescreve o JSON a cada execução
             },
         }
     }
